@@ -1,0 +1,8 @@
+Language: Cpp
+BasedOnStyle: Google
+
+ColumnLimit: 0
+AccessModifierOffset: -4
+TabWidth: 4
+IndentPPDirectives: BeforeHash
+IndentWidth: 4
