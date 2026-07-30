@@ -7,6 +7,8 @@ add_library(beaver
     app/application.cpp
     app/window.cpp
 
+    core/log.cpp
+
     graphics/device.cpp
     graphics/renderer.cpp
     graphics/renderer2d.cpp
