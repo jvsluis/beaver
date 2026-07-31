@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "beaver/app/applicationcontext.h"
+#include "beaver/app/layer.h"
 #include "beaver/app/window.h"
 #include "beaver/core/taskqueue.h"
 #include "beaver/graphics/renderer.h"
@@ -27,6 +28,11 @@ public:
     void run();
     void stop();
 
+    void add_layer(Layer* layer) {
+        layers_.push_back(layer);
+        layer->on_attach(context_);
+    }
+
     static void submit_to_main_thread(std::function<void()> task) {
         s_instance->main_thread_queue_.submit(task);
     }
@@ -38,6 +44,7 @@ private:
     ApplicationContext context_;
     core::TaskQueue main_thread_queue_;
     gfx::Renderer renderer_;
+    std::vector<Layer*> layers_;
 };
 
 std::unique_ptr<Application> create_application(CommandLineArgs& args);

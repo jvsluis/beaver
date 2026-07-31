@@ -25,13 +25,20 @@ struct Handle {
     }
 };
 
-class Texture {
-    wgpu::Texture texture;
-    wgpu::TextureView view;
-    wgpu::TextureUsage usage;
+struct TextureDescriptor {
+    const char* label;
     uint32_t width;
     uint32_t height;
-    uint32_t depth;
+    wgpu::TextureUsage usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::TextureFormat format = wgpu::TextureFormat::RGBA8Unorm;
+};
+
+struct Texture {
+    wgpu::Texture texture;
+    wgpu::TextureView view;
+    wgpu::TextureFormat format;
+    uint32_t width;
+    uint32_t height;
 };
 
 class Buffer {

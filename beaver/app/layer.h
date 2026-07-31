@@ -23,8 +23,17 @@ public:
 
     virtual void on_render(gfx::Renderer& renderer) {}
 
+    bool is_active() {
+        return is_active_;
+    }
+
+    void set_active(bool active) {
+        is_active_ = active;
+    }
+
 private:
     ApplicationContext* context_;
+    bool is_active_{true};
 };
 
 }  // namespace bvr::app

@@ -23,6 +23,8 @@ public:
     void update();
     bool should_close();
 
+    GLFWwindow* handle() { return handle_; }
+
 private:
     GLFWwindow* handle_;
 };

@@ -5,13 +5,32 @@
 #include <cstdlib>
 
 #include "beaver/core/log.h"
+#include "beaver/graphics/gpuresources.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace bvr::gfx {
 
-void Device::create(app::Window* window) {
+void Device::create(app::Window* window, bool vsync) {
     window_ = window;
+    vsync_ = vsync;
     setup_device();
+
+    // create the default textures
+    TextureDescriptor desc{};
+    desc.width = 1;
+    desc.height = 1;
+    desc.label = "default1x1";
+    desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    white_pixel_ = create_texture(desc);
+    magenta_pixel_ = create_texture(desc);
+
+    uint8_t white_pixel[4] = {255, 255, 255, 255};
+    write_texture(white_pixel_, &white_pixel, 4);
+
+    uint8_t magenta_pixel[4] = {255, 0, 255, 255};
+    write_texture(magenta_pixel_, &magenta_pixel, 4);
 }
 
 void Device::destroy() {}
@@ -32,6 +51,87 @@ wgpu::TextureView Device::get_surface_texture_view() {
 
     surface_.GetCurrentTexture(&current_surface_texture_);
     return current_surface_texture_.texture.CreateView();
+}
+
+Handle<Texture> Device::create_texture(const TextureDescriptor& desc) {
+    wgpu::TextureDescriptor tdesc = {
+        .label = desc.label,
+        .usage = desc.usage,
+        .dimension = wgpu::TextureDimension::e2D,
+        .size = {desc.width, desc.height, 1},
+        .format = desc.format,
+        .mipLevelCount = 1,
+        .sampleCount = 1,
+    };
+
+    wgpu::Texture raw_texture = device_.CreateTexture(&tdesc);
+
+    wgpu::TextureViewDescriptor view_desc{};
+    view_desc.format = desc.format;
+    view_desc.dimension = wgpu::TextureViewDimension::e2D;
+    view_desc.baseMipLevel = 0;
+    view_desc.mipLevelCount = 1;
+    view_desc.baseArrayLayer = 0;
+    view_desc.arrayLayerCount = 1;
+
+    wgpu::TextureView raw_view = raw_texture.CreateView(&view_desc);
+
+    Texture tex;
+    tex.texture = raw_texture;
+    tex.view = raw_view;
+    tex.format = desc.format;
+    tex.width = desc.width;
+    tex.height = desc.height;
+
+    return texture_pool_.insert(tex);
+}
+
+void Device::write_texture(Handle<Texture> handle, void* data, uint32_t size) {
+    Texture* tex = texture_pool_.get(handle);
+
+    if (!tex) {
+        CORE_WARN("Attempted to write a texture with an invalid handle");
+        return;
+    }
+
+    wgpu::TexelCopyTextureInfo destination{};
+    destination.texture = tex->texture;
+
+    wgpu::TexelCopyBufferLayout dataLayout{};
+    // Assuming 4 bytes per pixel (RGBA8).
+    // TODO(jvsluis): compute this based on the format
+    uint32_t bytesPerPixel = 4;
+    dataLayout.bytesPerRow = tex->width * bytesPerPixel;
+    dataLayout.rowsPerImage = tex->height;
+
+    wgpu::Extent3D extent = {tex->width, tex->height, 1};
+    queue_.WriteTexture(&destination, data, size, &dataLayout, &extent);
+}
+
+Texture& Device::get_texture(Handle<Texture> handle) {
+    Texture* tex = texture_pool_.get(handle);
+
+    if (!tex) {
+        CORE_WARN("Attempted to get a texture with an invalid handle");
+        return *texture_pool_.get(magenta_pixel_);
+    }
+
+    return *tex;
+}
+
+void Device::destroy_texture(Handle<Texture> handle) {
+    texture_pool_.remove(handle);
+}
+
+Handle<Texture> Device::create_framebuffer(uint32_t width, uint32_t height) {
+    bvr::gfx::TextureDescriptor desc = {
+        .label = "FrameBuffer",
+        .width = width,
+        .height = height,
+        .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    return create_texture(desc);
 }
 
 void Device::setup_device() {
@@ -106,10 +206,16 @@ void Device::configure_surface() {
     surface_.GetCapabilities(adapter_, &capabilities);
     surface_format_ = capabilities.formats[0];
 
+    wgpu::PresentMode present_mode = wgpu::PresentMode::Immediate;
+    if (vsync_) {
+        present_mode = wgpu::PresentMode::Fifo;
+    }
+
     wgpu::SurfaceConfiguration config{.device = device_,
                                       .format = surface_format_,
                                       .width = surface_width_,
-                                      .height = surface_height_};
+                                      .height = surface_height_,
+                                      .presentMode = present_mode};
     surface_.Configure(&config);
 }
 

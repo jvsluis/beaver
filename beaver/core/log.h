@@ -53,7 +53,7 @@ private:
 
 // #ifdef ENABLE_LOGGING
 #define CORE_INFO(msg, ...) bvr::core::logging::Logger::log(bvr::core::logging::Level::Info, msg, ##__VA_ARGS__);
-#define CORE_WARN(msg, ...) bvr::core::logging::Logger::log(bvr::core::logging::Level::Warn, msg, ##__VA_ARGS__);
+#define CORE_WARN(msg, ...) bvr::core::logging::Logger::log(bvr::core::logging::Level::Warning, msg, ##__VA_ARGS__);
 #define CORE_ERROR(msg, ...) bvr::core::logging::Logger::log(bvr::core::logging::Level::Error, msg, ##__VA_ARGS__);
 #define CORE_FATAL(msg, ...) bvr::core::logging::Logger::log(bvr::core::logging::Level::Fatal, msg, ##__VA_ARGS__);
 // #endif
