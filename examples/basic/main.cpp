@@ -1,3 +1,5 @@
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
 #include "beaver/app/application.h"
@@ -5,6 +7,7 @@
 #include "beaver/app/entry.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderer.h"
+#include "glm/ext/matrix_float4x4.hpp"
 
 class GameLayer : public bvr::app::Layer {
 public:
@@ -14,18 +17,30 @@ public:
         framebuffer_ = context.device->create_framebuffer(680, 400);
 
         view_.colour_target = framebuffer_;
-        view_.viewport = {0, 0, 680, 400};
+        view_.viewport = {0, 0, 680, 200};
+        view_.uniforms.projection_matrix = glm::ortho(0.0f, 680.0f, 200.0f, 0.0f, -1.0f, 1.0f);
+        view_.uniforms.view_matrix = glm::mat4x4(1.0);
 
-        spritesheet_ = context.asset_manager->load_texture("./assets/spritesheet.png");
+        spritesheet_ = context.asset_manager->load_texture("../assets/spritesheet.png");
     }
 
     void on_render(bvr::gfx::Renderer& renderer) override {
+        // Draw sub texture at 4:1 size
+        renderer.draw_textured_rect(spritesheet_, {16, 16, 64, 64}, {0.0, 0.0, 0.5, 0.5});
+
+        // Draw sub texture at 1:1 size
+        renderer.draw_textured_rect(spritesheet_, {100, 50, 16, 16}, {0.5, 0.0, 0.5, 0.5});
+
+        // Demonstrate texture recolouring with 2:1
+        renderer.draw_textured_rect(spritesheet_, {100, 125, 32, 32}, {0.5, 0.0, 0.5, 0.5}, {20, 20, 255, 255});
+
         renderer.flush_2d(view_, true);
         renderer.blit_to_surface(view_.colour_target);
     }
 
 private:
     bvr::gfx::RenderView view_;
+    bvr::gfx::RenderView view2_;
     bvr::core::Handle<bvr::gfx::Texture> framebuffer_;
     bvr::core::Handle<bvr::gfx::Texture> spritesheet_;
 };

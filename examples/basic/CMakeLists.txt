@@ -5,6 +5,8 @@
 ###############################################################################
 add_executable(basic main.cpp)
 
+add_dependencies(basic copy_example_assets)
+
 if (EMSCRIPTEN)
     set_target_properties(basic PROPERTIES
         SUFFIX ".html"

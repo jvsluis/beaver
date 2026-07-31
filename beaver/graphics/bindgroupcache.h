@@ -100,9 +100,9 @@ public:
         for (uint32_t i = 0; i < N; ++i) {
             core::Handle<Texture> handle = key.textures[i];
 
-            // If the handle is invalid (index 0, gen 0), this slot is empty. Skip it.
+            // If the handle is invalid (index 0, gen 0), this slot is empty. Use white pixel.
             if (!handle.valid()) {
-                continue;
+                handle = context_->device->white_pixel();
             }
 
             Texture& texture = context_->device->get_texture(handle);
