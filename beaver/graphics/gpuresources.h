@@ -22,7 +22,13 @@ struct Texture {
     uint32_t height;
 };
 
-class Buffer {
+struct BufferDescriptor {
+    const char* label;
+    uint64_t size;
+    wgpu::BufferUsage usage;
+};
+
+struct Buffer {
     wgpu::Buffer buffer;
     uint64_t size;
 };

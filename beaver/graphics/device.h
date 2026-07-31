@@ -3,6 +3,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "beaver/app/window.h"
+#include "beaver/core/handle.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/resourcepool.h"
 
@@ -20,8 +21,10 @@ public:
 
     wgpu::TextureView get_surface_texture_view();
 
-    core::Handle<Buffer> create_buffer();
-    core::Handle<Buffer> destroy_buffer();
+    core::Handle<Buffer> create_buffer(const BufferDescriptor& desc);
+    void write_buffer(core::Handle<Buffer> handle, void* data, uint64_t offset, uint64_t size);
+    Buffer& get_buffer(core::Handle<Buffer> handle);
+    void destroy_buffer(core::Handle<Buffer> handle);
 
     core::Handle<Texture> create_texture(const TextureDescriptor& desc);
     void write_texture(core::Handle<Texture> handle, void* data, uint32_t size);
@@ -56,7 +59,9 @@ private:
 
     core::Handle<Texture> white_pixel_;
     core::Handle<Texture> magenta_pixel_;
+    core::Handle<Buffer> dummy_buffer_;
 
+    ResourcePool<Buffer> buffer_pool_;
     ResourcePool<Texture> texture_pool_;
 };
 

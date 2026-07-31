@@ -21,7 +21,7 @@ void Device::create(app::Window* window, bool vsync) {
 
     setup_device();
 
-    // create the default textures
+    // Create the default textures
     TextureDescriptor desc{};
     desc.width = 1;
     desc.height = 1;
@@ -37,6 +37,16 @@ void Device::create(app::Window* window, bool vsync) {
 
     uint8_t magenta_pixel[4] = {255, 0, 255, 255};
     write_texture(magenta_pixel_, &magenta_pixel, 4);
+
+    // Create the dummy buffer
+    BufferDescriptor buffer_desc{};
+    buffer_desc.label = "default buffer";
+    buffer_desc.size = 1;
+    buffer_desc.usage = wgpu::BufferUsage::CopyDst;
+    dummy_buffer_ = create_buffer(buffer_desc);
+
+    uint8_t zero = 0;
+    write_buffer(dummy_buffer_, &zero, 0, 1);
 }
 
 void Device::destroy() {}
@@ -57,6 +67,51 @@ wgpu::TextureView Device::get_surface_texture_view() {
 
     surface_.GetCurrentTexture(&current_surface_texture_);
     return current_surface_texture_.texture.CreateView();
+}
+
+core::Handle<Buffer> Device::create_buffer(const BufferDescriptor& desc) {
+    wgpu::BufferDescriptor bdesc = {
+        .label = desc.label,
+        .usage = desc.usage,
+        .size = desc.size,
+        .mappedAtCreation = false,
+    };
+
+    wgpu::Buffer raw_buffer = device_.CreateBuffer(&bdesc);
+
+    Buffer buffer;
+    buffer.buffer = raw_buffer;
+    buffer.size = desc.size;
+
+    return buffer_pool_.insert(buffer);
+}
+
+void Device::write_buffer(core::Handle<Buffer> handle, void* data, uint64_t offset, uint64_t size) {
+    Buffer* buffer = buffer_pool_.get(handle);
+
+    if (!buffer) {
+        CORE_ERROR("Attempted to write a buffer with an invalid handle");
+        return;
+    }
+
+    queue_.WriteBuffer(buffer->buffer, offset, data, size);
+}
+
+Buffer& Device::get_buffer(core::Handle<Buffer> handle) {
+    Buffer* buffer = buffer_pool_.get(handle);
+
+    if (!buffer) {
+        CORE_ERROR("Attempted to get a buffer with an invalid handle");
+
+        // Return the dummy buffer to try prevent application from crashing
+        return *buffer_pool_.get(dummy_buffer_);
+    }
+
+    return *buffer;
+}
+
+void Device::destroy_buffer(core::Handle<Buffer> handle) {
+    buffer_pool_.remove(handle);
 }
 
 core::Handle<Texture> Device::create_texture(const TextureDescriptor& desc) {
@@ -96,7 +151,7 @@ void Device::write_texture(core::Handle<Texture> handle, void* data, uint32_t si
     Texture* tex = texture_pool_.get(handle);
 
     if (!tex) {
-        CORE_WARN("Attempted to write a texture with an invalid handle");
+        CORE_ERROR("Attempted to write a texture with an invalid handle");
         return;
     }
 
@@ -118,7 +173,7 @@ Texture& Device::get_texture(core::Handle<Texture> handle) {
     Texture* tex = texture_pool_.get(handle);
 
     if (!tex) {
-        CORE_WARN("Attempted to get a texture with an invalid handle");
+        CORE_ERROR("Attempted to get a texture with an invalid handle");
         return *texture_pool_.get(magenta_pixel_);
     }
 
