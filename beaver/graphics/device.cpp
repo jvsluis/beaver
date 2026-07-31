@@ -208,6 +208,7 @@ void Device::configure_surface() {
 
     wgpu::PresentMode present_mode = wgpu::PresentMode::Immediate;
     if (vsync_) {
+        CORE_INFO("Enabled VSync");
         present_mode = wgpu::PresentMode::Fifo;
     }
 
@@ -217,6 +218,7 @@ void Device::configure_surface() {
                                       .height = surface_height_,
                                       .presentMode = present_mode};
     surface_.Configure(&config);
+    is_surface_dirty_ = false;
 }
 
 }  // namespace bvr::gfx
