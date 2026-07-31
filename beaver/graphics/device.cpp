@@ -41,12 +41,12 @@ void Device::create(app::Window* window, bool vsync) {
     // Create the dummy buffer
     BufferDescriptor buffer_desc{};
     buffer_desc.label = "default buffer";
-    buffer_desc.size = 1;
+    buffer_desc.size = 4;
     buffer_desc.usage = wgpu::BufferUsage::CopyDst;
     dummy_buffer_ = create_buffer(buffer_desc);
 
-    uint8_t zero = 0;
-    write_buffer(dummy_buffer_, &zero, 0, 1);
+    uint32_t zero = 0;
+    write_buffer(dummy_buffer_, &zero, 0, 4);
 }
 
 void Device::destroy() {}
