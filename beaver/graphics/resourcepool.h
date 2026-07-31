@@ -3,14 +3,14 @@
 #include <cstdint>
 #include <vector>
 
-#include "beaver/graphics/gpuresources.h"
+#include "beaver/core/handle.h"
 
 namespace bvr::gfx {
 
 template <typename T>
 class ResourcePool {
 public:
-    Handle<T> insert(T resource) {
+    core::Handle<T> insert(T resource) {
         uint32_t index;
 
         if (free_list_head_ != UINT32_MAX) {
@@ -25,10 +25,10 @@ public:
         slot.resource = std::move(resource);
         slot.active = true;
 
-        return Handle<T>{index, slot.generation};
+        return core::Handle<T>{index, slot.generation};
     }
 
-    T* get(Handle<T> handle) {
+    T* get(core::Handle<T> handle) {
         if (!handle.valid() || handle.index >= slots_.size()) {
             return nullptr;
         }
@@ -43,7 +43,7 @@ public:
         return &slot.resource;
     }
 
-    void remove(Handle<T> handle) {
+    void remove(core::Handle<T> handle) {
         if (handle.valid() || handle.index >= slots_.size()) {
             return;
         }

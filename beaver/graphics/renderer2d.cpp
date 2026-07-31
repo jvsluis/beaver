@@ -42,7 +42,7 @@ void Renderer2D::end_frame() {
     current_command_encoder_ = nullptr;
 }
 
-void Renderer2D::draw_textured_rect(Handle<Texture> handle, core::Rect<uint16_t> position, core::Rect<float> uv, core::Colour<uint8_t> colour) {
+void Renderer2D::draw_textured_rect(core::Handle<Texture> handle, core::Rect<uint16_t> position, core::Rect<float> uv, core::Colour<uint8_t> colour) {
     // TODO(jvsluis): implement
 }
 

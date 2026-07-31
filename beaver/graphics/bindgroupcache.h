@@ -12,7 +12,7 @@ namespace bvr::gfx {
 
 template <size_t N>
 struct BindGroupCacheKey {
-    Handle<Texture> textures[N];
+    core::Handle<Texture> textures[N];
 
     bool operator==(const BindGroupCacheKey& other) const {
         for (int i = 0; i < N; ++i) {
@@ -98,7 +98,7 @@ public:
         entries.reserve(N);
 
         for (uint32_t i = 0; i < N; ++i) {
-            Handle<Texture> handle = key.textures[i];
+            core::Handle<Texture> handle = key.textures[i];
 
             // If the handle is invalid (index 0, gen 0), this slot is empty. Skip it.
             if (!handle.valid()) {

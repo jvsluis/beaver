@@ -59,7 +59,7 @@ wgpu::TextureView Device::get_surface_texture_view() {
     return current_surface_texture_.texture.CreateView();
 }
 
-Handle<Texture> Device::create_texture(const TextureDescriptor& desc) {
+core::Handle<Texture> Device::create_texture(const TextureDescriptor& desc) {
     wgpu::TextureDescriptor tdesc = {
         .label = desc.label,
         .usage = desc.usage,
@@ -92,7 +92,7 @@ Handle<Texture> Device::create_texture(const TextureDescriptor& desc) {
     return texture_pool_.insert(tex);
 }
 
-void Device::write_texture(Handle<Texture> handle, void* data, uint32_t size) {
+void Device::write_texture(core::Handle<Texture> handle, void* data, uint32_t size) {
     Texture* tex = texture_pool_.get(handle);
 
     if (!tex) {
@@ -114,7 +114,7 @@ void Device::write_texture(Handle<Texture> handle, void* data, uint32_t size) {
     queue_.WriteTexture(&destination, data, size, &dataLayout, &extent);
 }
 
-Texture& Device::get_texture(Handle<Texture> handle) {
+Texture& Device::get_texture(core::Handle<Texture> handle) {
     Texture* tex = texture_pool_.get(handle);
 
     if (!tex) {
@@ -125,11 +125,11 @@ Texture& Device::get_texture(Handle<Texture> handle) {
     return *tex;
 }
 
-void Device::destroy_texture(Handle<Texture> handle) {
+void Device::destroy_texture(core::Handle<Texture> handle) {
     texture_pool_.remove(handle);
 }
 
-Handle<Texture> Device::create_framebuffer(uint32_t width, uint32_t height) {
+core::Handle<Texture> Device::create_framebuffer(uint32_t width, uint32_t height) {
     bvr::gfx::TextureDescriptor desc = {
         .label = "FrameBuffer",
         .width = width,

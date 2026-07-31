@@ -20,14 +20,14 @@ public:
 
     wgpu::TextureView get_surface_texture_view();
 
-    Handle<Buffer> create_buffer();
-    Handle<Buffer> destroy_buffer();
+    core::Handle<Buffer> create_buffer();
+    core::Handle<Buffer> destroy_buffer();
 
-    Handle<Texture> create_texture(const TextureDescriptor& desc);
-    void write_texture(Handle<Texture> handle, void* data, uint32_t size);
-    Texture& get_texture(Handle<Texture> handle);
-    void destroy_texture(Handle<Texture> handle);
-    Handle<Texture> create_framebuffer(uint32_t width, uint32_t height);
+    core::Handle<Texture> create_texture(const TextureDescriptor& desc);
+    void write_texture(core::Handle<Texture> handle, void* data, uint32_t size);
+    Texture& get_texture(core::Handle<Texture> handle);
+    void destroy_texture(core::Handle<Texture> handle);
+    core::Handle<Texture> create_framebuffer(uint32_t width, uint32_t height);
 
     wgpu::Device& device() { return device_; }
     wgpu::Queue& queue() { return queue_; }
@@ -52,8 +52,8 @@ private:
     uint32_t surface_width_{1};
     uint32_t surface_height_{1};
 
-    Handle<Texture> white_pixel_;
-    Handle<Texture> magenta_pixel_;
+    core::Handle<Texture> white_pixel_;
+    core::Handle<Texture> magenta_pixel_;
 
     ResourcePool<Texture> texture_pool_;
 };

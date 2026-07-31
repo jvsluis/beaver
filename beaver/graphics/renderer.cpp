@@ -87,7 +87,7 @@ void Renderer::flush_2d(RenderView& view, bool clear_background) {
     renderer2d_.flush(view, clear_background);
 }
 
-void Renderer::blit_to_surface(Handle<Texture> handle) {
+void Renderer::blit_to_surface(core::Handle<Texture> handle) {
     wgpu::RenderPassColorAttachment attachment{
         .view = surface_view_,
         .loadOp = wgpu::LoadOp::Clear,

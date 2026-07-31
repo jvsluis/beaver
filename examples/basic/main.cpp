@@ -24,7 +24,7 @@ public:
 
 private:
     bvr::gfx::RenderView view_;
-    bvr::gfx::Handle<bvr::gfx::Texture> framebuffer_;
+    bvr::core::Handle<bvr::gfx::Texture> framebuffer_;
 };
 
 class BasicApplication : public bvr::app::Application {

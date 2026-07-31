@@ -20,7 +20,7 @@ public:
     void start_frame(wgpu::CommandEncoder& encoder);
     void end_frame();
 
-    void draw_textured_rect(Handle<Texture> handle, core::Rect<uint16_t> position, core::Rect<float> uv, core::Colour<uint8_t> colour = {255, 255, 255, 255});
+    void draw_textured_rect(core::Handle<Texture> handle, core::Rect<uint16_t> position, core::Rect<float> uv, core::Colour<uint8_t> colour = {255, 255, 255, 255});
 
     void flush(RenderView& view, bool clear_background);
 

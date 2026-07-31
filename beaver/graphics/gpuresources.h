@@ -6,25 +6,6 @@
 
 namespace bvr::gfx {
 
-template <typename T>
-struct Handle {
-    // 0 is used to represent an invalid handle
-    uint32_t index = 0;
-    uint32_t generation = 0;
-
-    bool valid() const {
-        return generation > 0;
-    }
-
-    bool operator==(const Handle& other) const {
-        return index == other.index && generation == other.generation;
-    }
-
-    bool operator!=(const Handle& other) const {
-        return !(*this == other);
-    }
-};
-
 struct TextureDescriptor {
     const char* label;
     uint32_t width;
