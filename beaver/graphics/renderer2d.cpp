@@ -53,7 +53,7 @@ void Renderer2D::flush(RenderView& view, bool clear_background) {
         .view = texture_view,
         .loadOp = clear_background ? wgpu::LoadOp::Clear : wgpu::LoadOp::Load,
         .storeOp = wgpu::StoreOp::Store,
-        .clearValue = {0.0, 0.0, 1.0, 1.0},
+        .clearValue = {0.0, 0.0, 0.4, 1.0},
     };
 
     wgpu::RenderPassDescriptor renderpass{.colorAttachmentCount = 1,

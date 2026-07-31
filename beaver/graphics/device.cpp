@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 
+#include "beaver/app/window.h"
 #include "beaver/core/log.h"
 #include "beaver/graphics/gpuresources.h"
 #include "webgpu/webgpu_cpp.h"
@@ -13,6 +14,11 @@ namespace bvr::gfx {
 void Device::create(app::Window* window, bool vsync) {
     window_ = window;
     vsync_ = vsync;
+
+    app::WindowSize window_size = window->window_size();
+    surface_width_ = window_size.framebuffer_width;
+    surface_height_ = window_size.framebuffer_height;
+
     setup_device();
 
     // create the default textures

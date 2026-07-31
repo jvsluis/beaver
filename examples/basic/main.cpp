@@ -11,10 +11,10 @@ public:
     GameLayer() {}
 
     void on_attach(bvr::app::ApplicationContext& context) override {
-        framebuffer_ = context.device->create_framebuffer(200, 200);
+        framebuffer_ = context.device->create_framebuffer(680, 400);
 
         view_.colour_target = framebuffer_;
-        view_.viewport = {680, 400};
+        view_.viewport = {0, 0, 680, 400};
     }
 
     void on_render(bvr::gfx::Renderer& renderer) override {

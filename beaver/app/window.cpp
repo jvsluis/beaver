@@ -18,6 +18,21 @@ bool Window::create(const WindowDescriptor& desc) {
     handle_ = glfwCreateWindow(desc.width, desc.height, desc.title.c_str(), nullptr, nullptr);
     glfwSetWindowUserPointer(handle_, this);
 
+    // Query initial window sizing
+    int fb_width = 0, fb_height = 0;
+    glfwGetFramebufferSize(handle_, &fb_width, &fb_height);
+
+    if (fb_width == 0 || fb_height == 0) {
+        // Fallback to logical size if fb dims are zero (ex: the window starts minimized)
+        fb_width = desc.width;
+        fb_height = desc.height;
+    }
+
+    window_size_.logical_width = desc.width;
+    window_size_.logical_height = desc.height;
+    window_size_.framebuffer_width = fb_width;
+    window_size_.framebuffer_height = fb_height;
+
     return true;
 }
 

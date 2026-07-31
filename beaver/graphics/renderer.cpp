@@ -17,7 +17,7 @@ void Renderer::create(app::ApplicationContext& context) {
     wgpu::ShaderModuleDescriptor shaderModuleDescriptor{.nextInChain = &wgsl};
     wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDescriptor);
 
-    wgpu::ColorTargetState colorTargetState{.format = wgpu::TextureFormat::RGB10A2Unorm};
+    wgpu::ColorTargetState colorTargetState{.format = context.device->surface_format()};
 
     wgpu::FragmentState fragmentState{
         .module = shaderModule,
