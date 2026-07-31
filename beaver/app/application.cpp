@@ -15,6 +15,9 @@ Application::Application(const ApplicationDescriptor& desc) {
     context_.device = std::make_unique<gfx::Device>();
     context_.device->create(context_.window.get(), desc.vsync);
 
+    context_.asset_manager = std::make_unique<asset::AssetManager>();
+    context_.asset_manager->create(*context_.device);
+
     renderer_.create(context_);
 
     CORE_INFO("Finished creating the application");

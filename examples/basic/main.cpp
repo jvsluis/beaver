@@ -15,6 +15,8 @@ public:
 
         view_.colour_target = framebuffer_;
         view_.viewport = {0, 0, 680, 400};
+
+        spritesheet_ = context.asset_manager->load_texture("./assets/spritesheet.png");
     }
 
     void on_render(bvr::gfx::Renderer& renderer) override {
@@ -25,6 +27,7 @@ public:
 private:
     bvr::gfx::RenderView view_;
     bvr::core::Handle<bvr::gfx::Texture> framebuffer_;
+    bvr::core::Handle<bvr::gfx::Texture> spritesheet_;
 };
 
 class BasicApplication : public bvr::app::Application {

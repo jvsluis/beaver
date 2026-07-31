@@ -32,6 +32,8 @@ public:
     wgpu::Device& device() { return device_; }
     wgpu::Queue& queue() { return queue_; }
     wgpu::TextureFormat surface_format() { return surface_format_; }
+    core::Handle<Texture> white_pixel() { return white_pixel_; };
+    core::Handle<Texture> magenta_pixel() { return magenta_pixel_; }
 
 private:
     void setup_device();
