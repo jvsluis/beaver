@@ -26,6 +26,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glm)
 
+# Correct the clip-space z range from [-1,1] => [0,1] for webgpu
+target_compile_definitions(glm INTERFACE
+    GLM_FORCE_DEPTH_ZERO_TO_ONE
+)
 
 # This fixes a dawn_glfw bug that uses the legacy EMSCRIPTEN definition
 if (EMSCRIPTEN)
