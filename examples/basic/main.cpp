@@ -5,6 +5,7 @@
 #include "beaver/app/application.h"
 #include "beaver/app/enginecontext.h"
 #include "beaver/app/entry.h"
+#include "beaver/app/input.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderer.h"
 #include "glm/ext/matrix_float4x4.hpp"
@@ -17,11 +18,30 @@ public:
         framebuffer_ = context.device.create_framebuffer(680, 400);
 
         view_.colour_target = framebuffer_;
-        view_.viewport = {0, 0, 680, 200};
-        view_.uniforms.projection_matrix = glm::ortho(0.0f, 680.0f, 200.0f, 0.0f, -1.0f, 1.0f);
+        view_.viewport = {0, 0, 680, 400};
+        view_.uniforms.projection_matrix = glm::ortho(0.0f, 680.0f, 400.0f, 0.0f, -1.0f, 1.0f);
         view_.uniforms.view_matrix = glm::mat4x4(1.0);
 
         spritesheet_ = context.asset_manager.load_texture("../assets/spritesheet.png");
+
+        position_ = {0, 0, 0};
+    }
+
+    void on_update(double delta) override {
+        if (bvr::app::Input::key_pressed(bvr::app::KeyCode::W)) {
+            position_.y -= 1;
+        }
+        if (bvr::app::Input::key_pressed(bvr::app::KeyCode::A)) {
+            position_.x -= 1;
+        }
+        if (bvr::app::Input::key_pressed(bvr::app::KeyCode::S)) {
+            position_.y += 1;
+        }
+        if (bvr::app::Input::key_pressed(bvr::app::KeyCode::D)) {
+            position_.x += 1;
+        }
+
+        view_.uniforms.view_matrix = glm::translate(glm::mat4(1.0f), position_);
     }
 
     void on_render(bvr::graphics::Renderer& renderer) override {
@@ -35,12 +55,12 @@ public:
         renderer.draw_textured_rect(spritesheet_, {100, 125, 32, 32}, {0.5, 0.0, 0.5, 0.5}, {20, 20, 255, 255});
 
         renderer.flush_2d(view_, true);
-        renderer.blit_to_surface(view_.colour_target);
+        renderer.blit_to_surface(framebuffer_);
     }
 
 private:
+    glm::vec3 position_;
     bvr::graphics::RenderView view_;
-    bvr::graphics::RenderView view2_;
     bvr::core::Handle<bvr::graphics::Texture> framebuffer_;
     bvr::core::Handle<bvr::graphics::Texture> spritesheet_;
 };

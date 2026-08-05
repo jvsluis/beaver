@@ -3,6 +3,7 @@
 #include <memory>
 #include <ranges>
 
+#include "beaver/app/input.h"
 #include "beaver/core/log.h"
 #include "beaver/core/taskqueue.h"
 
@@ -24,6 +25,8 @@ Application::Application(const ApplicationDescriptor& desc) {
 
     renderer_ = std::make_unique<graphics::Renderer>(*device_);
     renderer_->create();
+
+    Input::init(window_->handle());
 
     CORE_INFO("Finished creating the application");
 }

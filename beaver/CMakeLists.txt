@@ -5,6 +5,7 @@
 ###############################################################################
 add_library(beaver
     app/application.cpp
+    app/input.cpp
     app/window.cpp
 
     assets/assetmanager.cpp
