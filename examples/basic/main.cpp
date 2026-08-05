@@ -13,15 +13,15 @@ class GameLayer : public bvr::app::Layer {
 public:
     GameLayer() {}
 
-    void on_attach(bvr::app::ApplicationContext& context) override {
-        framebuffer_ = context.device->create_framebuffer(680, 400);
+    void on_attach(const bvr::app::EngineContext& context) override {
+        framebuffer_ = context.device.create_framebuffer(680, 400);
 
         view_.colour_target = framebuffer_;
         view_.viewport = {0, 0, 680, 200};
         view_.uniforms.projection_matrix = glm::ortho(0.0f, 680.0f, 200.0f, 0.0f, -1.0f, 1.0f);
         view_.uniforms.view_matrix = glm::mat4x4(1.0);
 
-        spritesheet_ = context.asset_manager->load_texture("../assets/spritesheet.png");
+        spritesheet_ = context.asset_manager.load_texture("../assets/spritesheet.png");
     }
 
     void on_render(bvr::gfx::Renderer& renderer) override {

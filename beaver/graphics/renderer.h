@@ -1,6 +1,5 @@
 #pragma once
 
-#include "beaver/app/applicationcontext.h"
 #include "beaver/graphics/bindgroupcache.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderer2d.h"
@@ -10,10 +9,10 @@ namespace bvr::gfx {
 
 class Renderer {
 public:
-    Renderer() = default;
+    Renderer(Device& device) : device_(device), renderer2d_(device) {}
     ~Renderer() = default;
 
-    void create(app::ApplicationContext& context);
+    void create();
     void destroy();
     void start_frame();
     void end_frame();
@@ -31,7 +30,8 @@ public:
     }
 
 private:
-    app::ApplicationContext* context_{nullptr};
+    Device& device_;
+
     wgpu::TextureView surface_view_;
     wgpu::CommandEncoder current_encoder_;
     Renderer2D renderer2d_;

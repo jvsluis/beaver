@@ -2,7 +2,6 @@
 
 #include <webgpu/webgpu_cpp.h>
 
-#include "beaver/app/applicationcontext.h"
 #include "beaver/core/colour.h"
 #include "beaver/core/geometry.h"
 #include "beaver/graphics/bindgroupcache.h"
@@ -15,10 +14,10 @@ constexpr size_t MAX_TEXTURE_SLOTS = 4;
 
 class Renderer2D {
 public:
-    Renderer2D() = default;
+    Renderer2D(Device& device) : device_(device) {}
     ~Renderer2D() = default;
 
-    void create(app::ApplicationContext& context);
+    void create();
     void destroy();
     void start_frame(wgpu::CommandEncoder& encoder);
     void end_frame();
@@ -28,6 +27,8 @@ public:
     void flush(RenderView& view, bool clear_background);
 
 private:
+    Device& device_;
+
     struct RenderCommand2D {
         uint32_t texture_id;
         core::Rect<uint16_t> position;
@@ -40,7 +41,6 @@ private:
         uint32_t size = 0;
     };
 
-    app::ApplicationContext* context_;
     std::vector<RenderCommand2D> commands_;
     std::vector<RenderBatch2D> batches_;
 

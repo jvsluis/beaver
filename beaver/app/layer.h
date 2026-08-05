@@ -11,7 +11,7 @@ public:
     Layer() = default;
     ~Layer() = default;
 
-    virtual void on_attach(ApplicationContext& context) {
+    virtual void on_attach(const EngineContext& context) {
         context_ = &context;
     }
 
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    ApplicationContext* context_;
+    const EngineContext* context_;
     bool is_active_{true};
 };
 

@@ -5,8 +5,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "beaver/app/applicationcontext.h"
+#include "beaver/core/handle.h"
 #include "beaver/core/log.h"
+#include "beaver/graphics/device.h"
+#include "beaver/graphics/gpuresources.h"
 
 namespace bvr::gfx {
 
@@ -58,8 +60,8 @@ public:
     BindGroupCache() = default;
     ~BindGroupCache() = default;
 
-    void create(bvr::app::ApplicationContext& context, wgpu::BindGroupLayout layout) {
-        context_ = &context;
+    void create(Device& device, wgpu::BindGroupLayout layout) {
+        device_ = &device;
 
         bindgroup_layout_ = layout;
     }
@@ -102,10 +104,10 @@ public:
 
             // If the handle is invalid (index 0, gen 0), this slot is empty. Use white pixel.
             if (!handle.valid()) {
-                handle = context_->device->white_pixel();
+                handle = device_->white_pixel();
             }
 
-            Texture& texture = context_->device->get_texture(handle);
+            Texture& texture = device_->get_texture(handle);
 
             wgpu::BindGroupEntry entry{};
             entry.binding = i;
@@ -121,13 +123,13 @@ public:
         desc.entryCount = static_cast<uint32_t>(entries.size());
         desc.entries = entries.data();
 
-        wgpu::BindGroup new_bindgroup = context_->device->device().CreateBindGroup(&desc);
+        wgpu::BindGroup new_bindgroup = device_->device().CreateBindGroup(&desc);
         map_[key] = {new_bindgroup, current_frame_};
         return new_bindgroup;
     }
 
 private:
-    app::ApplicationContext* context_;
+    Device* device_;
     std::unordered_map<BindGroupCacheKey<N>, CachedBindGroup, BindGroupCacheKeyHash<N>> map_;
     wgpu::BindGroupLayout bindgroup_layout_;
     uint64_t current_frame_{0};

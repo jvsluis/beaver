@@ -1,6 +1,5 @@
 #include "beaver/graphics/renderer2d.h"
 
-#include "beaver/app/applicationcontext.h"
 #include "beaver/graphics/bindgroupcache.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderview.h"
@@ -9,14 +8,12 @@
 
 namespace bvr::gfx {
 
-void Renderer2D::create(app::ApplicationContext& context) {
-    context_ = &context;
-
+void Renderer2D::create() {
     // Init the pipeline
     wgpu::ShaderSourceWGSL wgsl{{.code = render2d_wgsl}};
 
     wgpu::ShaderModuleDescriptor shaderModuleDescriptor{.nextInChain = &wgsl};
-    wgpu::ShaderModule shaderModule = context_->device->device().CreateShaderModule(&shaderModuleDescriptor);
+    wgpu::ShaderModule shaderModule = device_.device().CreateShaderModule(&shaderModuleDescriptor);
 
     std::vector<wgpu::VertexAttribute> attributes(4);
     attributes[0].format = wgpu::VertexFormat::Uint32;
@@ -70,7 +67,7 @@ void Renderer2D::create(app::ApplicationContext& context) {
         },
         .fragment = &fragmentState,
     };
-    render_pipeline_ = context_->device->device().CreateRenderPipeline(&descriptor);
+    render_pipeline_ = device_.device().CreateRenderPipeline(&descriptor);
 
     // Create the Command Buffer with a default size
     BufferDescriptor buffer_desc{
@@ -78,7 +75,7 @@ void Renderer2D::create(app::ApplicationContext& context) {
         .size = 1024 * sizeof(RenderCommand2D),
         .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex,
     };
-    command_buffer_ = context.device->create_buffer(buffer_desc);
+    command_buffer_ = device_.create_buffer(buffer_desc);
 
     // Create the uniform buffer
     buffer_desc = {
@@ -86,7 +83,7 @@ void Renderer2D::create(app::ApplicationContext& context) {
         .size = sizeof(RenderUniforms),
         .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform,
     };
-    uniforms_buffer_ = context.device->create_buffer(buffer_desc);
+    uniforms_buffer_ = device_.create_buffer(buffer_desc);
 
     // Create the sampler
     wgpu::SamplerDescriptor samplerDesc;
@@ -96,12 +93,12 @@ void Renderer2D::create(app::ApplicationContext& context) {
     samplerDesc.addressModeU = wgpu::AddressMode::ClampToEdge;
     samplerDesc.addressModeV = wgpu::AddressMode::ClampToEdge;
     samplerDesc.addressModeW = wgpu::AddressMode::ClampToEdge;
-    sampler_ = context.device->device().CreateSampler(&samplerDesc);
+    sampler_ = device_.device().CreateSampler(&samplerDesc);
 
     // Create the bindgroup
     std::vector<wgpu::BindGroupEntry> bg_entries(2);
     bg_entries[0].binding = 0;
-    bg_entries[0].buffer = context.device->get_buffer(uniforms_buffer_).buffer;
+    bg_entries[0].buffer = device_.get_buffer(uniforms_buffer_).buffer;
 
     bg_entries[1].binding = 1;
     bg_entries[1].sampler = sampler_;
@@ -111,10 +108,10 @@ void Renderer2D::create(app::ApplicationContext& context) {
     bg_desc.entryCount = static_cast<uint32_t>(bg_entries.size());
     bg_desc.entries = bg_entries.data();
 
-    render_bindgroup_ = context_->device->device().CreateBindGroup(&bg_desc);
+    render_bindgroup_ = device_.device().CreateBindGroup(&bg_desc);
 
     // Create the texture bindgroup cache
-    render_bindgroup_cache_.create(context, render_pipeline_.GetBindGroupLayout(1));
+    render_bindgroup_cache_.create(device_, render_pipeline_.GetBindGroupLayout(1));
 }
 
 void Renderer2D::destroy() {}
@@ -182,17 +179,17 @@ void Renderer2D::flush(RenderView& view, bool clear_background) {
     // We must ensure the size is sufficient, otherwise we'll need to recreate the buffer
 
     uint64_t commands_byte_size = commands_.size() * sizeof(RenderCommand2D);
-    Buffer& draw_buffer = context_->device->get_buffer(command_buffer_);
+    Buffer& draw_buffer = device_.get_buffer(command_buffer_);
     if (draw_buffer.size <= commands_byte_size) {
         // TODO(jvsluis): Need to resize
     }
 
-    context_->device->write_buffer(command_buffer_, commands_.data(), 0, commands_byte_size);
+    device_.write_buffer(command_buffer_, commands_.data(), 0, commands_byte_size);
 
     // Update the uniforms
-    context_->device->write_buffer(uniforms_buffer_, &view.uniforms, 0, sizeof(RenderUniforms));
+    device_.write_buffer(uniforms_buffer_, &view.uniforms, 0, sizeof(RenderUniforms));
 
-    wgpu::TextureView texture_view = context_->device->get_texture(view.colour_target).view;
+    wgpu::TextureView texture_view = device_.get_texture(view.colour_target).view;
 
     wgpu::RenderPassColorAttachment attachment{
         .view = texture_view,
@@ -226,7 +223,7 @@ void Renderer2D::flush(RenderView& view, bool clear_background) {
         pass.SetPipeline(render_pipeline_);
         pass.SetBindGroup(0, render_bindgroup_);
         pass.SetBindGroup(1, render_bindgroup_cache_.get(batch.key));
-        pass.SetVertexBuffer(0, context_->device->get_buffer(command_buffer_).buffer, offset, batch_width);
+        pass.SetVertexBuffer(0, device_.get_buffer(command_buffer_).buffer, offset, batch_width);
         pass.Draw(6, commands_.size());
 
         offset += batch.size * batch_width;

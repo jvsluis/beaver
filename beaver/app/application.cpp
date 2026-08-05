@@ -1,24 +1,29 @@
 #include "beaver/app/application.h"
 
+#include <memory>
 #include <ranges>
 
 #include "beaver/core/log.h"
+#include "beaver/core/taskqueue.h"
 
 namespace bvr::app {
 
 Application::Application(const ApplicationDescriptor& desc) {
     running_ = false;
 
-    context_.window = std::make_unique<Window>();
-    context_.window->create(desc.window_desc);
+    window_ = std::make_unique<Window>();
+    window_->create(desc.window_desc);
 
-    context_.device = std::make_unique<gfx::Device>();
-    context_.device->create(context_.window.get(), desc.vsync);
+    device_ = std::make_unique<gfx::Device>();
+    device_->create(window_.get(), desc.vsync);
 
-    context_.asset_manager = std::make_unique<asset::AssetManager>();
-    context_.asset_manager->create(*context_.device);
+    asset_manager_ = std::make_unique<asset::AssetManager>();
+    asset_manager_->create(*device_);
 
-    renderer_.create(context_);
+    main_thread_queue_ = std::make_unique<core::TaskQueue>();
+
+    renderer_ = std::make_unique<gfx::Renderer>(*device_);
+    renderer_->create();
 
     CORE_INFO("Finished creating the application");
 }
@@ -29,11 +34,11 @@ Application::~Application() {
         layer = nullptr;
     }
 
-    context_.device->destroy();
-    context_.device.reset();
+    device_->destroy();
+    device_.reset();
 
-    context_.window->destroy();
-    context_.window.reset();
+    window_->destroy();
+    window_.reset();
 }
 
 void Application::run() {
@@ -47,10 +52,10 @@ void Application::run() {
         double delta_time = std::chrono::duration<double>(current_time - last_frame_time).count();
         last_frame_time = current_time;
 
-        context_.window->update();
-        main_thread_queue_.process();
+        window_->update();
+        main_thread_queue_->process();
 
-        renderer_.start_frame();
+        renderer_->start_frame();
 
         for (Layer* layer : layers_) {
             if (layer->is_active()) {
@@ -60,16 +65,16 @@ void Application::run() {
 
         for (Layer* layer : layers_) {
             if (layer->is_active()) {
-                layer->on_render(renderer_);
+                layer->on_render(*renderer_);
             }
         }
 
-        renderer_.end_frame();
+        renderer_->end_frame();
 
-        context_.device->surface_present();
-        context_.device->tick();
+        device_->surface_present();
+        device_->tick();
 
-        if (context_.window->should_close()) {
+        if (window_->should_close()) {
             stop();
         }
     }

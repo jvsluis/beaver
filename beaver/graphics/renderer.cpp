@@ -4,20 +4,18 @@
 
 namespace bvr::gfx {
 
-void Renderer::create(app::ApplicationContext& context) {
-    context_ = &context;
-
-    renderer2d_.create(context);
+void Renderer::create() {
+    renderer2d_.create();
 
     // Create the blit pipeline
-    wgpu::Device& device = context_->device->device();
+    wgpu::Device& device = device_.device();
 
     wgpu::ShaderSourceWGSL wgsl{{.code = blit_wgsl}};
 
     wgpu::ShaderModuleDescriptor shaderModuleDescriptor{.nextInChain = &wgsl};
     wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDescriptor);
 
-    wgpu::ColorTargetState colorTargetState{.format = context.device->surface_format()};
+    wgpu::ColorTargetState colorTargetState{.format = device_.surface_format()};
 
     wgpu::FragmentState fragmentState{
         .module = shaderModule,
@@ -55,19 +53,17 @@ void Renderer::create(app::ApplicationContext& context) {
     blit_sampler_bindgroup_ = device.CreateBindGroup(&bg_desc);
 
     // Create cache
-    blit_bindgroup_cache_.create(context, blit_render_pipeline_.GetBindGroupLayout(1));
+    blit_bindgroup_cache_.create(device_, blit_render_pipeline_.GetBindGroupLayout(1));
 }
 
 void Renderer::destroy() {
     renderer2d_.destroy();
-
-    context_ = nullptr;
 }
 
 void Renderer::start_frame() {
-    surface_view_ = context_->device->get_surface_texture_view();
+    surface_view_ = device_.get_surface_texture_view();
 
-    current_encoder_ = context_->device->device().CreateCommandEncoder();
+    current_encoder_ = device_.device().CreateCommandEncoder();
     renderer2d_.start_frame(current_encoder_);
 
     blit_bindgroup_cache_.garbage_collect();
@@ -76,7 +72,7 @@ void Renderer::start_frame() {
 
 void Renderer::end_frame() {
     wgpu::CommandBuffer commands = current_encoder_.Finish();
-    context_->device->queue().Submit(1, &commands);
+    device_.queue().Submit(1, &commands);
 
     renderer2d_.end_frame();
     surface_view_ = nullptr;
