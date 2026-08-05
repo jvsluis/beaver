@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "beaver/app/application.h"
-#include "beaver/app/applicationcontext.h"
+#include "beaver/app/enginecontext.h"
 #include "beaver/app/entry.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderer.h"
@@ -24,7 +24,7 @@ public:
         spritesheet_ = context.asset_manager.load_texture("../assets/spritesheet.png");
     }
 
-    void on_render(bvr::gfx::Renderer& renderer) override {
+    void on_render(bvr::graphics::Renderer& renderer) override {
         // Draw sub texture at 4:1 size
         renderer.draw_textured_rect(spritesheet_, {16, 16, 64, 64}, {0.0, 0.0, 0.5, 0.5});
 
@@ -39,10 +39,10 @@ public:
     }
 
 private:
-    bvr::gfx::RenderView view_;
-    bvr::gfx::RenderView view2_;
-    bvr::core::Handle<bvr::gfx::Texture> framebuffer_;
-    bvr::core::Handle<bvr::gfx::Texture> spritesheet_;
+    bvr::graphics::RenderView view_;
+    bvr::graphics::RenderView view2_;
+    bvr::core::Handle<bvr::graphics::Texture> framebuffer_;
+    bvr::core::Handle<bvr::graphics::Texture> spritesheet_;
 };
 
 class BasicApplication : public bvr::app::Application {

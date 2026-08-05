@@ -6,17 +6,17 @@
 #include "beaver/graphics/device.h"
 #include "beaver/graphics/gpuresources.h"
 
-namespace bvr::asset {
+namespace bvr::assets {
 
 class AssetManager {
 public:
-    void create(gfx::Device& device);
+    void create(graphics::Device& device);
 
-    core::Handle<gfx::Texture> load_texture(const std::string& file_path);
+    core::Handle<graphics::Texture> load_texture(const std::string& file_path);
 
 private:
-    gfx::Device* device_;
-    std::unordered_map<std::string, core::Handle<gfx::Texture>> texture_cache_;
+    graphics::Device* device_;
+    std::unordered_map<std::string, core::Handle<graphics::Texture>> texture_cache_;
 };
 
-}  // namespace bvr::asset
+}  // namespace bvr::assets

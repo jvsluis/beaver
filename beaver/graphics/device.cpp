@@ -9,7 +9,7 @@
 #include "beaver/graphics/gpuresources.h"
 #include "webgpu/webgpu_cpp.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 void Device::create(app::Window* window, bool vsync) {
     window_ = window;
@@ -185,7 +185,7 @@ void Device::destroy_texture(core::Handle<Texture> handle) {
 }
 
 core::Handle<Texture> Device::create_framebuffer(uint32_t width, uint32_t height) {
-    bvr::gfx::TextureDescriptor desc = {
+    TextureDescriptor desc = {
         .label = "FrameBuffer",
         .width = width,
         .height = height,
@@ -282,4 +282,4 @@ void Device::configure_surface() {
     is_surface_dirty_ = false;
 }
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

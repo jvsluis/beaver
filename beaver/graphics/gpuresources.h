@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 struct TextureDescriptor {
     const char* label;
@@ -37,4 +37,4 @@ class Sampler {
     wgpu::Sampler sampler;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

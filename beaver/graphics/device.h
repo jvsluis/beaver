@@ -7,7 +7,7 @@
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/resourcepool.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 class Device {
 public:
@@ -65,4 +65,4 @@ private:
     ResourcePool<Texture> texture_pool_;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

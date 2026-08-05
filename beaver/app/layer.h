@@ -1,6 +1,6 @@
 #pragma once
 
-#include "beaver/app/applicationcontext.h"
+#include "beaver/app/enginecontext.h"
 #include "beaver/events/event.h"
 #include "beaver/graphics/renderer.h"
 
@@ -17,11 +17,11 @@ public:
 
     virtual void on_detach() {}
 
-    virtual void on_event(event::Event& event) {}
+    virtual void on_event(events::Event& event) {}
 
     virtual void on_update(double delta) {}
 
-    virtual void on_render(gfx::Renderer& renderer) {}
+    virtual void on_render(graphics::Renderer& renderer) {}
 
     bool is_active() {
         return is_active_;

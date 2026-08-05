@@ -6,7 +6,7 @@
 #include "beaver/graphics/shaders/render2d.wgsl.h"
 #include "webgpu/webgpu_cpp.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 void Renderer2D::create() {
     // Init the pipeline
@@ -232,4 +232,4 @@ void Renderer2D::flush(RenderView& view, bool clear_background) {
     pass.End();
 }
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

@@ -5,7 +5,7 @@
 
 #include "beaver/core/handle.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 template <typename T>
 class ResourcePool {
@@ -84,4 +84,4 @@ private:
     uint32_t free_list_head_ = UINT32_MAX;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

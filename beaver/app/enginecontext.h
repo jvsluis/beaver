@@ -9,8 +9,8 @@ namespace bvr::app {
 
 struct EngineContext {
     Window& window;
-    gfx::Device& device;
-    asset::AssetManager& asset_manager;
+    graphics::Device& device;
+    assets::AssetManager& asset_manager;
     core::TaskQueue& main_thread_queue;
 };
 

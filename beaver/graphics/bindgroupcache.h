@@ -10,7 +10,7 @@
 #include "beaver/graphics/device.h"
 #include "beaver/graphics/gpuresources.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 template <size_t N>
 struct BindGroupCacheKey {
@@ -135,4 +135,4 @@ private:
     uint64_t current_frame_{0};
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

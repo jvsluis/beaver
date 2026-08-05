@@ -2,7 +2,7 @@
 
 #include "beaver/graphics/shaders/blit.wgsl.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 void Renderer::create() {
     renderer2d_.create();
@@ -107,4 +107,4 @@ void Renderer::blit_to_surface(core::Handle<Texture> handle) {
     pass.End();
 }
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

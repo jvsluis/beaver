@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "beaver/app/applicationcontext.h"
+#include "beaver/app/enginecontext.h"
 #include "beaver/app/layer.h"
 #include "beaver/app/window.h"
 #include "beaver/core/taskqueue.h"
@@ -48,10 +48,10 @@ private:
     bool running_;
 
     std::unique_ptr<Window> window_;
-    std::unique_ptr<gfx::Device> device_;
-    std::unique_ptr<asset::AssetManager> asset_manager_;
+    std::unique_ptr<graphics::Device> device_;
+    std::unique_ptr<assets::AssetManager> asset_manager_;
     std::unique_ptr<core::TaskQueue> main_thread_queue_;
-    std::unique_ptr<gfx::Renderer> renderer_;
+    std::unique_ptr<graphics::Renderer> renderer_;
 
     std::vector<Layer*> layers_;
 };

@@ -14,15 +14,15 @@ Application::Application(const ApplicationDescriptor& desc) {
     window_ = std::make_unique<Window>();
     window_->create(desc.window_desc);
 
-    device_ = std::make_unique<gfx::Device>();
+    device_ = std::make_unique<graphics::Device>();
     device_->create(window_.get(), desc.vsync);
 
-    asset_manager_ = std::make_unique<asset::AssetManager>();
+    asset_manager_ = std::make_unique<assets::AssetManager>();
     asset_manager_->create(*device_);
 
     main_thread_queue_ = std::make_unique<core::TaskQueue>();
 
-    renderer_ = std::make_unique<gfx::Renderer>(*device_);
+    renderer_ = std::make_unique<graphics::Renderer>(*device_);
     renderer_->create();
 
     CORE_INFO("Finished creating the application");

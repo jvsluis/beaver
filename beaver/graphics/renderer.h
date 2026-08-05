@@ -5,7 +5,7 @@
 #include "beaver/graphics/renderer2d.h"
 #include "webgpu/webgpu_cpp.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 class Renderer {
 public:
@@ -42,4 +42,4 @@ private:
     BindGroupCache<1> blit_bindgroup_cache_;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

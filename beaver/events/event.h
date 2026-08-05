@@ -1,6 +1,6 @@
 #pragma once
 
-namespace bvr::event {
+namespace bvr::events {
 
 class Event {
 public:
@@ -9,4 +9,4 @@ public:
     bool handled = false;
 };
 
-}  // namespace bvr::event
+}  // namespace bvr::events

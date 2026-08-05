@@ -2,7 +2,7 @@
 
 #include "beaver/events/event.h"
 
-namespace bvr::event {
+namespace bvr::events {
 
 class MouseMovedEvent : public Event {
 public:
@@ -17,4 +17,4 @@ private:
     double y_;
 };
 
-}  // namespace bvr::event
+}  // namespace bvr::events

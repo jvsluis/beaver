@@ -8,7 +8,7 @@
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderview.h"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 constexpr size_t MAX_TEXTURE_SLOTS = 4;
 
@@ -59,4 +59,4 @@ private:
     core::Handle<Buffer> command_buffer_;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

@@ -5,7 +5,7 @@
 #include "beaver/graphics/gpuresources.h"
 #include "glm/ext/matrix_float4x4.hpp"
 
-namespace bvr::gfx {
+namespace bvr::graphics {
 
 struct RenderUniforms {
     glm::mat4x4 projection_matrix;
@@ -19,4 +19,4 @@ struct RenderView {
     RenderUniforms uniforms;
 };
 
-}  // namespace bvr::gfx
+}  // namespace bvr::graphics

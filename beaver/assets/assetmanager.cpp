@@ -11,14 +11,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "beaver/thirdparty/stb_image/stb_image.h"
 
-namespace bvr::asset {
+namespace bvr::assets {
 
-void AssetManager::create(gfx::Device& device) {
+void AssetManager::create(graphics::Device& device) {
     device_ = &device;
 }
 
 // TODO(jvsluis): make this web friendly
-core::Handle<gfx::Texture> AssetManager::load_texture(const std::string& file_path) {
+core::Handle<graphics::Texture> AssetManager::load_texture(const std::string& file_path) {
     auto it = texture_cache_.find(file_path);
     if (it != texture_cache_.end()) {
         return it->second;
@@ -61,7 +61,7 @@ core::Handle<gfx::Texture> AssetManager::load_texture(const std::string& file_pa
     // Calculate the size of the uncompressed data
     std::size_t total_bytes = static_cast<std::size_t>(uwidth * uheight * desired_channels);
 
-    gfx::TextureDescriptor desc = {
+    graphics::TextureDescriptor desc = {
         .label = "",
         .width = uwidth,
         .height = uheight,
@@ -79,4 +79,4 @@ core::Handle<gfx::Texture> AssetManager::load_texture(const std::string& file_pa
     return handle;
 }
 
-}  // namespace bvr::asset
+}  // namespace bvr::assets
