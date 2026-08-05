@@ -79,8 +79,8 @@ void Renderer::end_frame() {
     current_encoder_ = nullptr;
 }
 
-void Renderer::flush_2d(RenderView& view, bool clear_background) {
-    renderer2d_.flush(view, clear_background);
+void Renderer::flush_2d(std::span<RenderView*> views) {
+    renderer2d_.flush(views);
 }
 
 void Renderer::blit_to_surface(core::Handle<Texture> handle) {

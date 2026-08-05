@@ -15,6 +15,7 @@ struct RenderUniforms {
 struct RenderView {
     core::Handle<Texture> colour_target;
     core::Rect<uint32_t> viewport;
+    bool clearColourTarget = true;
 
     RenderUniforms uniforms;
 };

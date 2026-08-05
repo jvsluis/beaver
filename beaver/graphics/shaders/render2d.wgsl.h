@@ -30,11 +30,11 @@ const unit_quad = array<vec2<f32>, 6>(
 );
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var tex_sampler: sampler;
-@group(1) @binding(0) var tex_0: texture_2d<f32>;
-@group(1) @binding(1) var tex_1: texture_2d<f32>;
-@group(1) @binding(2) var tex_2: texture_2d<f32>;
-@group(1) @binding(3) var tex_3: texture_2d<f32>;
+@group(1) @binding(0) var tex_sampler: sampler;
+@group(2) @binding(0) var tex_0: texture_2d<f32>;
+@group(2) @binding(1) var tex_1: texture_2d<f32>;
+@group(2) @binding(2) var tex_2: texture_2d<f32>;
+@group(2) @binding(3) var tex_3: texture_2d<f32>;
 
 @vertex fn vertexMain(@builtin(vertex_index) v_idx: u32, @builtin(instance_index) i_idx: u32, input: InstanceInput) -> FragmentInput {
     let quad = unit_quad[v_idx];

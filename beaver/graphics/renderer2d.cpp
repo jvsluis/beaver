@@ -1,5 +1,7 @@
 #include "beaver/graphics/renderer2d.h"
 
+#include <cstring>
+
 #include "beaver/graphics/bindgroupcache.h"
 #include "beaver/graphics/gpuresources.h"
 #include "beaver/graphics/renderview.h"
@@ -59,7 +61,67 @@ void Renderer2D::create() {
         .targets = &colorTargetState,
     };
 
+    // Define bindgroup layouts
+    // Uniform
+    wgpu::BindGroupLayoutEntry bg0_entry = {};
+    bg0_entry.binding = 0;
+    bg0_entry.visibility = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
+    bg0_entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    bg0_entry.buffer.hasDynamicOffset = true;
+    bg0_entry.buffer.minBindingSize = sizeof(RenderUniforms);
+
+    wgpu::BindGroupLayoutDescriptor bg0_desc = {};
+    bg0_desc.label = "Group 0: Uniforms";
+    bg0_desc.entryCount = 1;
+    bg0_desc.entries = &bg0_entry;
+
+    wgpu::BindGroupLayout layoutGroup0 = device_.device().CreateBindGroupLayout(&bg0_desc);
+
+    // Sampler
+    wgpu::BindGroupLayoutEntry bg1_entry = {};
+    bg1_entry.binding = 0;
+    bg1_entry.visibility = wgpu::ShaderStage::Fragment;
+    bg1_entry.sampler.type = wgpu::SamplerBindingType::Filtering;
+
+    wgpu::BindGroupLayoutDescriptor bg1_desc = {};
+    bg1_desc.label = "Group 1: Sampler";
+    bg1_desc.entryCount = 1;
+    bg1_desc.entries = &bg1_entry;
+
+    wgpu::BindGroupLayout layoutGroup1 = device_.device().CreateBindGroupLayout(&bg1_desc);
+
+    // Textures
+    std::vector<wgpu::BindGroupLayoutEntry> bg2_entries(4);
+
+    for (uint32_t i = 0; i < 4; ++i) {
+        bg2_entries[i].binding = i;
+        bg2_entries[i].visibility = wgpu::ShaderStage::Fragment;
+        bg2_entries[i].texture.sampleType = wgpu::TextureSampleType::Float;
+        bg2_entries[i].texture.viewDimension = wgpu::TextureViewDimension::e2D;
+        bg2_entries[i].texture.multisampled = false;
+    }
+
+    wgpu::BindGroupLayoutDescriptor bg2_desc = {};
+    bg2_desc.label = "Group 2: Textures";
+    bg2_desc.entryCount = static_cast<uint32_t>(bg2_entries.size());
+    bg2_desc.entries = bg2_entries.data();
+
+    wgpu::BindGroupLayout layoutGroup2 = device_.device().CreateBindGroupLayout(&bg2_desc);
+
+    // Create Pipeline Layout
+    wgpu::BindGroupLayout bindGroupLayouts[] = {layoutGroup0, layoutGroup1, layoutGroup2};
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
+    pipelineLayoutDesc.label = "Main Pipeline Layout";
+    pipelineLayoutDesc.bindGroupLayoutCount = 3;
+    pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts;
+
+    wgpu::PipelineLayout explicitPipelineLayout = device_.device().CreatePipelineLayout(&pipelineLayoutDesc);
+
+    // Create the Pipeline
     wgpu::RenderPipelineDescriptor descriptor{
+        .label = "Main Render Pipeline",
+        .layout = explicitPipelineLayout,
         .vertex = {
             .module = shaderModule,
             .bufferCount = 1,
@@ -80,7 +142,7 @@ void Renderer2D::create() {
     // Create the uniform buffer
     buffer_desc = {
         .label = "Uniform Buffer",
-        .size = sizeof(RenderUniforms),
+        .size = 1024,  // 4 * sizeof(RenderUniforms),
         .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform,
     };
     uniforms_buffer_ = device_.create_buffer(buffer_desc);
@@ -96,22 +158,32 @@ void Renderer2D::create() {
     sampler_ = device_.device().CreateSampler(&samplerDesc);
 
     // Create the bindgroup
-    std::vector<wgpu::BindGroupEntry> bg_entries(2);
-    bg_entries[0].binding = 0;
-    bg_entries[0].buffer = device_.get_buffer(uniforms_buffer_).buffer;
+    std::vector<wgpu::BindGroupEntry> bg_entries0(1);
+    bg_entries0[0].binding = 0;
+    bg_entries0[0].buffer = device_.get_buffer(uniforms_buffer_).buffer;
+    bg_entries0[0].offset = 0;
+    bg_entries0[0].size = sizeof(RenderUniforms);
 
-    bg_entries[1].binding = 1;
-    bg_entries[1].sampler = sampler_;
+    wgpu::BindGroupDescriptor bg_desc0{};
+    bg_desc0.layout = layoutGroup0;
+    bg_desc0.entryCount = static_cast<uint32_t>(bg_entries0.size());
+    bg_desc0.entries = bg_entries0.data();
 
-    wgpu::BindGroupDescriptor bg_desc{};
-    bg_desc.layout = render_pipeline_.GetBindGroupLayout(0);
-    bg_desc.entryCount = static_cast<uint32_t>(bg_entries.size());
-    bg_desc.entries = bg_entries.data();
+    uniform_bindgroup_ = device_.device().CreateBindGroup(&bg_desc0);
 
-    render_bindgroup_ = device_.device().CreateBindGroup(&bg_desc);
+    std::vector<wgpu::BindGroupEntry> bg_entries1(1);
+    bg_entries1[0].binding = 0;
+    bg_entries1[0].sampler = sampler_;
+
+    wgpu::BindGroupDescriptor bg_desc1{};
+    bg_desc1.layout = layoutGroup1;
+    bg_desc1.entryCount = static_cast<uint32_t>(bg_entries1.size());
+    bg_desc1.entries = bg_entries1.data();
+
+    sampler_bindgroup_ = device_.device().CreateBindGroup(&bg_desc1);
 
     // Create the texture bindgroup cache
-    render_bindgroup_cache_.create(device_, render_pipeline_.GetBindGroupLayout(1));
+    render_bindgroup_cache_.create(device_, layoutGroup2);
 }
 
 void Renderer2D::destroy() {}
@@ -174,7 +246,7 @@ void Renderer2D::draw_textured_rect(core::Handle<Texture> handle, core::Rect<uin
     batch_count_++;
 }
 
-void Renderer2D::flush(RenderView& view, bool clear_background) {
+void Renderer2D::flush(std::span<RenderView*> views) {
     // Push the current render command buffer to the GPU
     // We must ensure the size is sufficient, otherwise we'll need to recreate the buffer
 
@@ -186,50 +258,65 @@ void Renderer2D::flush(RenderView& view, bool clear_background) {
 
     device_.write_buffer(command_buffer_, commands_.data(), 0, commands_byte_size);
 
-    // Update the uniforms
-    device_.write_buffer(uniforms_buffer_, &view.uniforms, 0, sizeof(RenderUniforms));
+    // Update the uniforms using dynamic offsets for each view
+    const size_t uniform_stride = 256;
 
-    wgpu::TextureView texture_view = device_.get_texture(view.colour_target).view;
-
-    wgpu::RenderPassColorAttachment attachment{
-        .view = texture_view,
-        .loadOp = clear_background ? wgpu::LoadOp::Clear : wgpu::LoadOp::Load,
-        .storeOp = wgpu::StoreOp::Store,
-        .clearValue = {0.0, 0.0, 0.0, 1.0},
-    };
-
-    wgpu::RenderPassDescriptor renderpass{.colorAttachmentCount = 1,
-                                          .colorAttachments = &attachment};
-
-    wgpu::RenderPassEncoder pass = current_command_encoder_.BeginRenderPass(&renderpass);
-
-    pass.SetViewport(
-        view.viewport.x, view.viewport.y,
-        view.viewport.width, view.viewport.height,
-        0.0, 1.0);
-
-    if (batch_count_ > 0) {
-        batches_.emplace_back(RenderBatch2D{
-            active_textures_,
-            batch_count_,
-        });
-    }
-    batch_count_ = 0;
-
-    uint64_t offset = 0;
-    for (auto& batch : batches_) {
-        uint64_t batch_width = sizeof(RenderCommand2D) * batch.size;
-
-        pass.SetPipeline(render_pipeline_);
-        pass.SetBindGroup(0, render_bindgroup_);
-        pass.SetBindGroup(1, render_bindgroup_cache_.get(batch.key));
-        pass.SetVertexBuffer(0, device_.get_buffer(command_buffer_).buffer, offset, batch_width);
-        pass.Draw(6, commands_.size());
-
-        offset += batch.size * batch_width;
+    std::vector<uint8_t> uniform_upload_data(4 * uniform_stride, 0);
+    for (int i = 0; i < views.size(); i++) {
+        std::memcpy(uniform_upload_data.data() + (i * uniform_stride), &views[i]->uniforms, sizeof(RenderUniforms));
     }
 
-    pass.End();
+    device_.write_buffer(uniforms_buffer_, uniform_upload_data.data(), 0, 4 * uniform_stride);
+
+    // Do a full flush once per view, using dynamic offset uniforms for each view
+    for (int i = 0; i < views.size(); i++) {
+        RenderView* view = views[i];
+
+        wgpu::TextureView texture_view = device_.get_texture(view->colour_target).view;
+
+        wgpu::RenderPassColorAttachment attachment{
+            .view = texture_view,
+            .loadOp = view->clearColourTarget ? wgpu::LoadOp::Clear : wgpu::LoadOp::Load,
+            .storeOp = wgpu::StoreOp::Store,
+            .clearValue = {0.0, 0.0, 0.0, 1.0},
+        };
+
+        wgpu::RenderPassDescriptor renderpass{.colorAttachmentCount = 1,
+                                              .colorAttachments = &attachment};
+
+        wgpu::RenderPassEncoder pass = current_command_encoder_.BeginRenderPass(&renderpass);
+
+        pass.SetViewport(
+            view->viewport.x, view->viewport.y,
+            view->viewport.width, view->viewport.height,
+            0.0, 1.0);
+
+        if (batch_count_ > 0) {
+            batches_.emplace_back(RenderBatch2D{
+                active_textures_,
+                batch_count_,
+            });
+        }
+        batch_count_ = 0;
+
+        uint64_t offset = 0;
+        for (auto& batch : batches_) {
+            uint64_t batch_width = sizeof(RenderCommand2D) * batch.size;
+
+            pass.SetPipeline(render_pipeline_);
+
+            uint32_t dynamicOffset = static_cast<uint32_t>(i * uniform_stride);
+            pass.SetBindGroup(0, uniform_bindgroup_, 1, &dynamicOffset);
+            pass.SetBindGroup(1, sampler_bindgroup_);
+            pass.SetBindGroup(2, render_bindgroup_cache_.get(batch.key));
+            pass.SetVertexBuffer(0, device_.get_buffer(command_buffer_).buffer, offset, batch_width);
+            pass.Draw(6, commands_.size());
+
+            offset += batch.size * batch_width;
+        }
+
+        pass.End();
+    }
 }
 
 }  // namespace bvr::graphics

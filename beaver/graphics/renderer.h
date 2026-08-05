@@ -16,7 +16,7 @@ public:
     void destroy();
     void start_frame();
     void end_frame();
-    void flush_2d(RenderView& view, bool clear_background);
+    void flush_2d(std::span<RenderView*> views);
     void run_gc();
 
     void blit_to_surface(core::Handle<Texture> handle);
